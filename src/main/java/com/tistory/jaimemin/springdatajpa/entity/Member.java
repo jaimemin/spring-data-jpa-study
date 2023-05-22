@@ -9,6 +9,10 @@ import javax.persistence.*;
 @Entity
 @ToString(of = {"id", "username", "age"})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NamedQuery(
+        name = "Member.findByUsername",
+        query = "SELECT m FROM Member m WHERE m.username = :username"
+)
 public class Member {
 
     @Id
@@ -26,6 +30,11 @@ public class Member {
 
     public Member(String username) {
         this.username = username;
+    }
+
+    public Member(String username, int age) {
+        this.username = username;
+        this.age = age;
     }
 
     public Member(String username, int age, Team team) {

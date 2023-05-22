@@ -44,4 +44,23 @@ public class MemberJpaRepository {
     public Member find(Long id) {
         return entityManager.find(Member.class, id);
     }
+
+    public List<Member> findByUsernameAndAgeGreaterThan(String username, int age) {
+        return entityManager.createQuery("SELECT m FROM Member m WHERE m.username = :username and m.age > :age")
+                .setParameter("username", username)
+                .setParameter("age", age)
+                .getResultList();
+    }
+
+    /**
+     * NamedQuery는 컴파일 시점에 오류 잡을 수 있는게 장점
+     *
+     * @param username
+     * @return
+     */
+    public List<Member> findByUsername(String username) {
+        return entityManager.createNamedQuery("Member.findByUsername", Member.class)
+                .setParameter("username", username)
+                .getResultList();
+    }
 }
