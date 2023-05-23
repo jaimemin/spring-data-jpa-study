@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -136,5 +137,21 @@ class MemberRepositoryTest {
         List<Member> result = memberRepository.findByNames(Arrays.asList("AAA", "BBB"));
 
         assertThat(result.size()).isEqualTo(2);
+    }
+
+    @Test
+    public void returnType() {
+        Member member = new Member("AAA", 10);
+        Member member2 = new Member("BBB", 20);
+        memberRepository.save(member);
+        memberRepository.save(member2);
+
+        List<Member> aaa = memberRepository.findListByUsername("AAA"); // 얘는 없으면 empty list
+        Member findMember = memberRepository.findMemberByUsername("AAA"); // 얘는 없으면 null
+        Optional<Member> optionalMember = memberRepository.findOptionalByUsername("AAA"); // java8부터는 optional로 통일
+
+        assertThat(aaa.size()).isEqualTo(1);
+        assertThat(findMember).isEqualTo(member);
+        assertThat(optionalMember.get()).isEqualTo(member);
     }
 }
