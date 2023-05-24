@@ -2,11 +2,14 @@ package com.tistory.jaimemin.springdatajpa.repository;
 
 import com.tistory.jaimemin.springdatajpa.dto.MemberDto;
 import com.tistory.jaimemin.springdatajpa.entity.Member;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.LockModeType;
+import javax.persistence.QueryHint;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,4 +51,58 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     // Optional
     Optional<Member> findOptionalByUsername(String username);
 
+    @Query(value = "SELECT m FROM Member m LEFT JOIN m.team t", countQuery = "SELECT COUNT(m) FROM Member m")
+    Page<Member> findByAge(int age, Pageable pageable);
+
+    /**
+     * Read가 아닐 때 Modifying 필수
+     *
+     * @param age
+     * @return
+     */
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Member m SET m.age = m.age + 1 WHERE m.age >= :age")
+    int bulkAgePlus(@Param("age") int age);
+
+    /**
+     * FETCH JOIN
+     */
+    @Query("SELECT m FROM Member m LEFT JOIN FETCH m.team")
+    List<Member> findMemberFetchJoin();
+
+    /**
+     * FETCH JOIN JPQL의 대안
+     * EntityGraph는 JPA에서 제공하는 기능
+     */
+    @Override
+    @EntityGraph(attributePaths = ("team"))
+    List<Member> findAll();
+
+    @Query("SELECT m FROM Member m")
+    @EntityGraph(attributePaths = ("team"))
+    List<Member> findMemberEntityGraph();
+
+    @EntityGraph(attributePaths = ("team"))
+    List<Member> findEntityGraphByUsername(@Param("username") String username);
+
+    /**
+     * 거의 안 쓰이고 성능 테스트 후 필요 시
+     * 요즘 GC도 잘되어있고 굳이 이 정도 최적화까지는... 대규모 트래픽 서비스라면 고려
+     *
+     * 조회 성능이 진짜 딸린다면 앞단에 redis 같은 캐시를 배치하는 것이 최우선
+     */
+    @QueryHints(value = @QueryHint(name = "org.hibernate.readOnly", value = "true"))
+    Member findReadOnlyByUsername(String username);
+
+    // SELECT FOR UPDATE (LOCK)
+
+    /**
+     * 실시간 조회가 많은 서비스는 해당 lock 방식 권장 X
+     * Optimistic Lock으로 풀어야 함
+     *
+     * @param username
+     * @return
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    List<Member> findLockByUsername(String username);
 }
