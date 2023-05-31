@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
@@ -316,7 +317,34 @@ class MemberRepositoryTest {
     }
 
     @Test
-    public void callCustomRepository() {
+    public void callCustom() {
         List<Member> members = memberRepository.findMemberCustom();
     }
+
+    /**
+     * 실무에서 사용하기에는 너무 복잡한  specification
+     * 쓰지 말자!
+     *
+     * -> QueryDSL이 대안
+     */
+//    @Test
+//    public void specBasic() {
+//        // given
+//        Team teamA = new Team("teamA");
+//        entityManager.persist(teamA);
+//
+//        Member member = new Member("member", 0, teamA);
+//        Member member2 = new Member("member2", 0, teamA);
+//        entityManager.persist(member);
+//        entityManager.persist(member2);
+//
+//        entityManager.flush();
+//        entityManager.clear();
+//
+//        // when
+//        Specification<Member> spec = MemberSpec.username("m1").and(MemberSpec.teamName("teamA"));
+//        List<Member> result = memberRepository.findAll(spec);
+//
+//        assertThat(result.size()).isEqualTo(1);
+//    }
 }
