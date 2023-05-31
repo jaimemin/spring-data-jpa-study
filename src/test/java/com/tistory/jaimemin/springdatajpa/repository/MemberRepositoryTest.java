@@ -7,9 +7,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -320,6 +318,35 @@ class MemberRepositoryTest {
     public void callCustom() {
         List<Member> members = memberRepository.findMemberCustom();
     }
+
+    @Test
+    public void queryByExample() {
+        // given
+        Team teamA = new Team("teamA");
+        entityManager.persist(teamA);
+
+        Member member = new Member("member", 0, teamA);
+        Member member2 = new Member("member2", 0, teamA);
+        entityManager.persist(member);
+        entityManager.persist(member2);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        // when
+        // Probe
+        Member sampleMember = new Member("member");
+        Team team = new Team("teamA");
+        sampleMember.setTeam(team);
+        ExampleMatcher matcher = ExampleMatcher.matching()
+                .withIgnoreCase("age");
+        Example<Member> example = Example.of(sampleMember, matcher);
+
+        List<Member> members = memberRepository.findAll(example);
+
+        assertThat(members.get(0).getUsername()).isEqualTo("member");
+    }
+
 
     /**
      * 실무에서 사용하기에는 너무 복잡한  specification
