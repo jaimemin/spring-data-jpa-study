@@ -347,6 +347,75 @@ class MemberRepositoryTest {
         assertThat(members.get(0).getUsername()).isEqualTo("member");
     }
 
+    @Test
+    public void projections() {
+        // given
+        Team teamA = new Team("teamA");
+        entityManager.persist(teamA);
+
+        Member member = new Member("member", 0, teamA);
+        Member member2 = new Member("member2", 0, teamA);
+        entityManager.persist(member);
+        entityManager.persist(member2);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        // when
+        List<UsernameOnlyDto> result = memberRepository.findProjectionsByUsername("m1");
+
+        for (UsernameOnlyDto usernameOnlyDto : result) {
+            System.out.println("usernameOnlyDto.username = " + usernameOnlyDto.getUsername());
+        }
+    }
+
+    @Test
+    public void genericProjections() {
+        // given
+        Team teamA = new Team("teamA");
+        entityManager.persist(teamA);
+
+        Member member = new Member("member", 0, teamA);
+        Member member2 = new Member("member2", 0, teamA);
+        entityManager.persist(member);
+        entityManager.persist(member2);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        // when
+        List<UsernameOnlyDto> result = memberRepository.findGenericProjectionsByUsername("m1", UsernameOnlyDto.class);
+
+        for (UsernameOnlyDto usernameOnlyDto : result) {
+            System.out.println("usernameOnlyDto.username = " + usernameOnlyDto.getUsername());
+        }
+    }
+
+    @Test
+    public void nestedProjections() {
+        // given
+        Team teamA = new Team("teamA");
+        entityManager.persist(teamA);
+
+        Member member = new Member("member", 0, teamA);
+        Member member2 = new Member("member2", 0, teamA);
+        entityManager.persist(member);
+        entityManager.persist(member2);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        // when
+        List<NestedClosedProjections> result = memberRepository.findGenericProjectionsByUsername("m1", NestedClosedProjections.class);
+
+        for (NestedClosedProjections nestedClosedProjections : result) {
+            String username = nestedClosedProjections.getUsername();
+            System.out.println("username = " + username);
+            String teamName = nestedClosedProjections.getTeam().getName();
+            System.out.println("teamName = " + teamName); // nested 엔티티는 최적화가 안되는 문제점 (중첩구조에서는 한계가 있음)
+        }
+    }
+
 
     /**
      * 실무에서 사용하기에는 너무 복잡한  specification

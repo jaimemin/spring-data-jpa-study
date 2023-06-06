@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.LockModeType;
 import javax.persistence.QueryHint;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Optional;
 
@@ -105,4 +106,8 @@ public interface MemberRepository extends JpaRepository<Member, Long>, CustomMem
      */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     List<Member> findLockByUsername(String username);
+
+    List<UsernameOnlyDto> findProjectionsByUsername(@Param("username") String username);
+
+    <T> List<T> findGenericProjectionsByUsername(@Param("username") String username, Class<T> type);
 }
