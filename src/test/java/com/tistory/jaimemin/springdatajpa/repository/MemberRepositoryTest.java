@@ -416,6 +416,49 @@ class MemberRepositoryTest {
         }
     }
 
+    @Test
+    public void nativeQuery() {
+        // given
+        Team teamA = new Team("teamA");
+        entityManager.persist(teamA);
+
+        Member member = new Member("member", 0, teamA);
+        Member member2 = new Member("member2", 0, teamA);
+        entityManager.persist(member);
+        entityManager.persist(member2);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        // when
+        Member result = memberRepository.findByNativeQuery("m1");
+
+        System.out.println("result = " + result);
+    }
+
+    @Test
+    public void nativePageQuery() {
+        // given
+        Team teamA = new Team("teamA");
+        entityManager.persist(teamA);
+
+        Member member = new Member("member", 0, teamA);
+        Member member2 = new Member("member2", 0, teamA);
+        entityManager.persist(member);
+        entityManager.persist(member2);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        // when
+        Page<MemberProjection> result = memberRepository.findByNativeProjection(PageRequest.of(0, 10));
+
+        for (MemberProjection memberProjection : result.getContent()) {
+            System.out.println("memberProjection.username = " + memberProjection.getUsername());
+            System.out.println("memberProjection.teamName = " + memberProjection.getTeamName());
+        }
+    }
+
 
     /**
      * 실무에서 사용하기에는 너무 복잡한  specification
